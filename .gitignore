@@ -351,3 +351,7 @@ MigrationBackup/
 
 # model 
 *.bin
+
+# data
+*.json
+*.jsonl

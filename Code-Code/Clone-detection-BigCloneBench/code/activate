@@ -1,0 +1,17 @@
+10/10/2022 18:18:31 - WARNING - __main__ -   Process rank: -1, device: cuda, n_gpu: 1, distributed training: False, 16-bits training: False
+Downloading:   0%|          | 0.00/899k [00:00<?, ?B/s]Downloading:   4%|▍         | 33.8k/899k [00:00<00:03, 255kB/s]Downloading:  21%|██        | 184k/899k [00:00<00:00, 764kB/s] Downloading:  88%|████████▊ | 791k/899k [00:00<00:00, 2.47MB/s]Downloading: 100%|██████████| 899k/899k [00:00<00:00, 2.20MB/s]
+Downloading:   0%|          | 0.00/456k [00:00<?, ?B/s]Downloading:   9%|▉         | 41.0k/456k [00:00<00:01, 301kB/s]Downloading:  42%|████▏     | 194k/456k [00:00<00:00, 784kB/s] Downloading: 100%|██████████| 456k/456k [00:00<00:00, 1.33MB/s]
+Downloading:   0%|          | 0.00/481 [00:00<?, ?B/s]Downloading: 100%|██████████| 481/481 [00:00<00:00, 245kB/s]
+10/10/2022 18:18:37 - INFO - __main__ -   Training/evaluation parameters Namespace(adam_epsilon=1e-08, block_size=400, cache_dir='', config_name='microsoft/codebert-base', device=device(type='cuda'), do_eval=True, do_lower_case=False, do_test=True, do_train=False, epoch=2, eval_all_checkpoints=False, eval_batch_size=32, eval_data_file='../dataset/valid.txt', evaluate_during_training=True, fp16=False, fp16_opt_level='O1', gradient_accumulation_steps=1, learning_rate=5e-05, local_rank=-1, logging_steps=50, max_grad_norm=1.0, max_steps=-1, mlm=False, mlm_probability=0.15, model_name_or_path='microsoft/codebert-base', model_type='roberta', n_gpu=1, no_cuda=False, num_train_epochs=1.0, output_dir='./saved_models', overwrite_cache=False, overwrite_output_dir=False, per_gpu_eval_batch_size=32, per_gpu_train_batch_size=16, save_steps=50, save_total_limit=None, seed=123456, server_ip='', server_port='', start_epoch=0, start_step=0, test_data_file='../dataset/test.txt', tokenizer_name='roberta-base', train_batch_size=16, train_data_file='../dataset/train.txt', warmup_steps=0, weight_decay=0.0)
+Traceback (most recent call last):
+  File "run.py", line 639, in <module>
+    main()
+  File "run.py", line 624, in main
+    model.load_state_dict(torch.load(output_dir))
+  File "/home/fjiriges/anaconda3/envs/cuBERT/lib/python3.8/site-packages/torch/serialization.py", line 750, in load
+    with _open_file_like(f, 'rb') as opened_file:
+  File "/home/fjiriges/anaconda3/envs/cuBERT/lib/python3.8/site-packages/torch/serialization.py", line 269, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+  File "/home/fjiriges/anaconda3/envs/cuBERT/lib/python3.8/site-packages/torch/serialization.py", line 250, in __init__
+    super(_open_file, self).__init__(open(name, mode))
+FileNotFoundError: [Errno 2] No such file or directory: './saved_models/checkpoint-best-f1/model.bin'

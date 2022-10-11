@@ -38,7 +38,7 @@ from torch.utils.data.distributed import DistributedSampler
 try:
     from torch.utils.tensorboard import SummaryWriter
 except:
-    from tensorboardX import SummaryWriter
+    from tensorboard import SummaryWriter
 
 from tqdm import tqdm, trange
 import multiprocessing
@@ -82,7 +82,6 @@ def get_example(item):
         code2=tokenizer.tokenize(code)
         
     return convert_examples_to_features(code1,code2,label,url1,url2,tokenizer,args,cache)
-
 
 class InputFeatures(object):
     """A single training/test features for a example."""
@@ -158,15 +157,12 @@ class TextDataset(Dataset):
                     logger.info("input_tokens: {}".format([x.replace('\u0120','_') for x in example.input_tokens]))
                     logger.info("input_ids: {}".format(' '.join(map(str, example.input_ids))))
 
-
-
     def __len__(self):
         return len(self.examples)
 
     def __getitem__(self, item):
         
         return torch.tensor(self.examples[item].input_ids),torch.tensor(self.examples[item].label)
-
 
 def load_and_cache_examples(args, tokenizer, evaluate=False,test=False,pool=None):
     dataset = TextDataset(tokenizer, args, file_path=args.test_data_file if test else (args.eval_data_file if evaluate else args.train_data_file),block_size=args.block_size,pool=pool)
@@ -240,7 +236,7 @@ def train(args, train_dataset, model, tokenizer,pool):
     
     global_step = args.start_step
     tr_loss, logging_loss,avg_loss,tr_nb,tr_num,train_loss = 0.0, 0.0,0.0,0,0,0
-    best_mrr=0.0
+    # best_mrr=0.0
     best_f1=0
     # model.resize_token_embeddings(len(tokenizer))
     model.zero_grad()
@@ -255,7 +251,6 @@ def train(args, train_dataset, model, tokenizer,pool):
             labels=batch[1].to(args.device) 
             model.train()
             loss,logits = model(inputs,labels)
-
 
             if args.n_gpu > 1:
                 loss = loss.mean()  # mean() to average on multi-gpu parallel training
@@ -312,7 +307,7 @@ def train(args, train_dataset, model, tokenizer,pool):
                         logger.info("Saving model checkpoint to %s", output_dir)
                         
         if args.max_steps > 0 and global_step > args.max_steps:
-            train_iterator.close()
+            # train_iterator.close()
             break
     return global_step, tr_loss / global_step
 

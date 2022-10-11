@@ -22,6 +22,7 @@ class Model(nn.Module):
         outputs=self.encoder(input_ids,attention_mask=input_ids.ne(1))[0]
         logits=outputs
         prob=torch.sigmoid(logits)
+        
         if labels is not None:
             labels=labels.float()
             loss=torch.log(prob[:,0]+1e-10)*labels+torch.log((1-prob)[:,0]+1e-10)*(1-labels)

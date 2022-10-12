@@ -535,6 +535,7 @@ def main():
         train(args, train_dataset, model, tokenizer)
         
         writer.flush()
+        writer.close()
 
 
 

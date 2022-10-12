@@ -35,10 +35,7 @@ import torch
 from torch.utils.data import DataLoader, Dataset, SequentialSampler, RandomSampler,TensorDataset
 from torch.utils.data.distributed import DistributedSampler
 import json
-try:
-    from torch.utils.tensorboard import SummaryWriter
-except:
-    from tensorboardX import SummaryWriter
+from torch.utils.tensorboard import SummaryWriter
 
 from tqdm import tqdm, trange
 import multiprocessing
@@ -52,6 +49,8 @@ from transformers import (WEIGHTS_NAME, AdamW, get_linear_schedule_with_warmup,
                           DistilBertConfig, DistilBertForMaskedLM, DistilBertTokenizer)
 
 logger = logging.getLogger(__name__)
+# init tensorboard writer
+writer = SummaryWriter()
 
 MODEL_CLASSES = {
     'gpt2': (GPT2Config, GPT2LMHeadModel, GPT2Tokenizer),
@@ -60,8 +59,6 @@ MODEL_CLASSES = {
     'roberta': (RobertaConfig, RobertaForSequenceClassification, RobertaTokenizer),
     'distilbert': (DistilBertConfig, DistilBertForMaskedLM, DistilBertTokenizer)
 }
-
-
 
 class InputFeatures(object):
     """A single training/test features for a example."""
@@ -86,6 +83,7 @@ def convert_examples_to_features(js,tokenizer,args):
     source_ids =  tokenizer.convert_tokens_to_ids(source_tokens)
     padding_length = args.block_size - len(source_ids)
     source_ids+=[tokenizer.pad_token_id]*padding_length
+    
     return InputFeatures(source_tokens,source_ids,js['idx'],js['target'])
 
 class TextDataset(Dataset):
@@ -126,12 +124,14 @@ def train(args, train_dataset, model, tokenizer):
     
     train_dataloader = DataLoader(train_dataset, sampler=train_sampler, 
                                   batch_size=args.train_batch_size,num_workers=4,pin_memory=True)
+    
     args.max_steps=args.epoch*len( train_dataloader)
-    args.save_steps=len( train_dataloader)
-    args.warmup_steps=len( train_dataloader)
-    args.logging_steps=len( train_dataloader)
+    args.save_steps=len(train_dataloader)
+    args.warmup_steps=len(train_dataloader)
+    args.logging_steps=len(train_dataloader)
     args.num_train_epochs=args.epoch
     model.to(args.device)
+    
     # Prepare optimizer and schedule (linear warmup and decay)
     no_decay = ['bias', 'LayerNorm.weight']
     optimizer_grouped_parameters = [
@@ -194,7 +194,6 @@ def train(args, train_dataset, model, tokenizer):
             model.train()
             loss,logits = model(inputs,labels)
 
-
             if args.n_gpu > 1:
                 loss = loss.mean()  # mean() to average on multi-gpu parallel training
             if args.gradient_accumulation_steps > 1:
@@ -214,9 +213,12 @@ def train(args, train_dataset, model, tokenizer):
             if avg_loss==0:
                 avg_loss=tr_loss
             avg_loss=round(train_loss/tr_num,5)
+            # set description to tqdm bar
             bar.set_description("epoch {} loss {}".format(idx,avg_loss))
+            
+            # write loss to tensorboard
+            writer.add_scalar('train_loss', avg_loss, global_step)
 
-                
             if (step + 1) % args.gradient_accumulation_steps == 0:
                 optimizer.step()
                 optimizer.zero_grad()
@@ -250,9 +252,7 @@ def train(args, train_dataset, model, tokenizer):
                         output_dir = os.path.join(output_dir, '{}'.format('model.bin')) 
                         torch.save(model_to_save.state_dict(), output_dir)
                         logger.info("Saving model checkpoint to %s", output_dir)
-                        
-
-
+            
 
 def evaluate(args, model, tokenizer,eval_when_training=False):
     # Loop to handle MNLI double evaluation (matched, mis-matched)
@@ -533,6 +533,8 @@ def main():
             torch.distributed.barrier()
 
         train(args, train_dataset, model, tokenizer)
+        
+        writer.flush()
 
 
 

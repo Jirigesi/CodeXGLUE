@@ -3,11 +3,7 @@
 import torch
 import torch.nn as nn
 import torch
-from torch.autograd import Variable
-import copy
-from torch.nn import CrossEntropyLoss, MSELoss
 
-    
     
 class Model(nn.Module):   
     def __init__(self, encoder,config,tokenizer,args):
@@ -16,7 +12,6 @@ class Model(nn.Module):
         self.config=config
         self.tokenizer=tokenizer
         self.args=args
-    
         
     def forward(self, input_ids=None,labels=None): 
         outputs=self.encoder(input_ids,attention_mask=input_ids.ne(1))[0]

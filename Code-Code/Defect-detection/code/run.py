@@ -122,8 +122,11 @@ def train(args, train_dataset, model, tokenizer):
     args.train_batch_size = args.per_gpu_train_batch_size * max(1, args.n_gpu)
     train_sampler = RandomSampler(train_dataset) if args.local_rank == -1 else DistributedSampler(train_dataset)
     
-    train_dataloader = DataLoader(train_dataset, sampler=train_sampler, 
-                                  batch_size=args.train_batch_size,num_workers=4,pin_memory=True)
+    train_dataloader = DataLoader(train_dataset, 
+                                  sampler=train_sampler, 
+                                  batch_size=args.train_batch_size,
+                                  num_workers=4,
+                                  pin_memory=True)
     
     args.max_steps=args.epoch*len( train_dataloader)
     args.save_steps=len(train_dataloader)
@@ -134,19 +137,27 @@ def train(args, train_dataset, model, tokenizer):
     
     # Prepare optimizer and schedule (linear warmup and decay)
     no_decay = ['bias', 'LayerNorm.weight']
+    
     optimizer_grouped_parameters = [
         {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay)],
          'weight_decay': args.weight_decay},
-        {'params': [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
+        {'params': [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay)], 
+         'weight_decay': 0.0}
     ]
-    optimizer = AdamW(optimizer_grouped_parameters, lr=args.learning_rate, eps=args.adam_epsilon)
-    scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=args.max_steps*0.1,
+    # set up optimizer
+    optimizer = AdamW(optimizer_grouped_parameters, 
+                      lr=args.learning_rate, 
+                      eps=args.adam_epsilon)
+    # set up scheduler
+    scheduler = get_linear_schedule_with_warmup(optimizer, 
+                                                num_warmup_steps=args.max_steps*0.1,
                                                 num_training_steps=args.max_steps)
     if args.fp16:
         try:
             from apex import amp
         except ImportError:
             raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
+        # create mixed precision training model and optimizer
         model, optimizer = amp.initialize(model, optimizer, opt_level=args.fp16_opt_level)
 
     # multi-gpu training (should be after apex fp16 initialization)
@@ -155,13 +166,15 @@ def train(args, train_dataset, model, tokenizer):
 
     # Distributed training (should be after apex fp16 initialization)
     if args.local_rank != -1:
-        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.local_rank],
+        model = torch.nn.parallel.DistributedDataParallel(model, 
+                                                          device_ids=[args.local_rank],
                                                           output_device=args.local_rank,
                                                           find_unused_parameters=True)
 
     checkpoint_last = os.path.join(args.output_dir, 'checkpoint-last')
     scheduler_last = os.path.join(checkpoint_last, 'scheduler.pt')
     optimizer_last = os.path.join(checkpoint_last, 'optimizer.pt')
+    
     if os.path.exists(scheduler_last):
         scheduler.load_state_dict(torch.load(scheduler_last))
     if os.path.exists(optimizer_last):
@@ -179,7 +192,6 @@ def train(args, train_dataset, model, tokenizer):
     
     global_step = args.start_step
     tr_loss, logging_loss,avg_loss,tr_nb,tr_num,train_loss = 0.0, 0.0,0.0,0,0,0
-    best_mrr=0.0
     best_acc=0.0
     # model.resize_token_embeddings(len(tokenizer))
     model.zero_grad()

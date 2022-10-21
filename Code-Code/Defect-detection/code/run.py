@@ -179,7 +179,7 @@ def train(args, train_dataset, model, tokenizer):
         scheduler.load_state_dict(torch.load(scheduler_last))
     if os.path.exists(optimizer_last):
         optimizer.load_state_dict(torch.load(optimizer_last))
-    # Train!
+    # Train
     logger.info("***** Running training *****")
     logger.info("  Num examples = %d", len(train_dataset))
     logger.info("  Num Epochs = %d", args.num_train_epochs)
@@ -220,14 +220,15 @@ def train(args, train_dataset, model, tokenizer):
                 torch.nn.utils.clip_grad_norm_(model.parameters(), args.max_grad_norm)
 
             tr_loss += loss.item()
-            tr_num+=1
-            train_loss+=loss.item()
+            tr_num += 1
+            train_loss += loss.item()
+            
             if avg_loss==0:
                 avg_loss=tr_loss
+                
             avg_loss=round(train_loss/tr_num,5)
             # set description to tqdm bar
             bar.set_description("epoch {} loss {}".format(idx,avg_loss))
-            
             # write loss to tensorboard
             writer.add_scalar('train_loss', avg_loss, global_step)
 
@@ -252,9 +253,9 @@ def train(args, train_dataset, model, tokenizer):
                         
                     if results['eval_acc']>best_acc:
                         best_acc=results['eval_acc']
-                        logger.info("  "+"*"*20)  
+                        logger.info("  "+"*"*20)
                         logger.info("  Best acc:%s",round(best_acc,4))
-                        logger.info("  "+"*"*20)                          
+                        logger.info("  "+"*"*20)
                         
                         checkpoint_prefix = 'checkpoint-best-acc'
                         output_dir = os.path.join(args.output_dir, '{}'.format(checkpoint_prefix))                        
@@ -264,7 +265,6 @@ def train(args, train_dataset, model, tokenizer):
                         output_dir = os.path.join(output_dir, '{}'.format('model.bin')) 
                         torch.save(model_to_save.state_dict(), output_dir)
                         logger.info("Saving model checkpoint to %s", output_dir)
-            
 
 def evaluate(args, model, tokenizer,eval_when_training=False):
     # Loop to handle MNLI double evaluation (matched, mis-matched)
@@ -485,8 +485,6 @@ def main():
     logger.warning("Process rank: %s, device: %s, n_gpu: %s, distributed training: %s, 16-bits training: %s",
                    args.local_rank, device, args.n_gpu, bool(args.local_rank != -1), args.fp16)
 
-
-
     # Set seed
     set_seed(args.seed)
 
@@ -548,8 +546,6 @@ def main():
         
         writer.flush()
         writer.close()
-
-
 
     # Evaluation
     results = {}

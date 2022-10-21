@@ -20,6 +20,7 @@ class Model(nn.Module):
         
         if labels is not None:
             labels=labels.float()
+            # self write loss function nn.BCELoss()
             loss=torch.log(prob[:,0]+1e-10)*labels+torch.log((1-prob)[:,0]+1e-10)*(1-labels)
             loss=-loss.mean()
             return loss,prob

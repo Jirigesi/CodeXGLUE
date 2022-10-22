@@ -18,26 +18,18 @@ Fine-tuning the library models for language modeling on a text file (GPT, GPT-2,
 GPT and GPT-2 are fine-tuned using a causal language modeling (CLM) loss while BERT and RoBERTa are fine-tuned
 using a masked language modeling (MLM) loss.
 """
-
 from __future__ import absolute_import, division, print_function
-
 import argparse
-import glob
 import logging
 import os
-import pickle
 import random
-import re
-import shutil
-
 import numpy as np
 import torch
 from torch.utils.data import DataLoader, Dataset, SequentialSampler, RandomSampler,TensorDataset
 from torch.utils.data.distributed import DistributedSampler
 import json
 from torch.utils.tensorboard import SummaryWriter
-
-from tqdm import tqdm, trange
+from tqdm import tqdm
 import multiprocessing
 from model import Model
 cpu_cont = multiprocessing.cpu_count()
@@ -74,7 +66,6 @@ class InputFeatures(object):
         self.idx=str(idx)
         self.label=label
 
-        
 def convert_examples_to_features(js,tokenizer,args):
     #source
     code=' '.join(js['func'].split())
@@ -149,7 +140,7 @@ def train(args, train_dataset, model, tokenizer):
                       lr=args.learning_rate, 
                       eps=args.adam_epsilon)
     # set up scheduler
-    scheduler = get_linear_schedule_with_warmup(optimizer, 
+    scheduler = get_linear_schedule_with_warmup(optimizer,
                                                 num_warmup_steps=args.max_steps*0.1,
                                                 num_training_steps=args.max_steps)
     if args.fp16:
@@ -452,9 +443,6 @@ def main():
                         help="For distributed training: local_rank")
     parser.add_argument('--server_ip', type=str, default='', help="For distant debugging.")
     parser.add_argument('--server_port', type=str, default='', help="For distant debugging.")
-
-
-    
 
     args = parser.parse_args()
 

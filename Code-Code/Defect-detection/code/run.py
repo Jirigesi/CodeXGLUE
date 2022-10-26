@@ -507,6 +507,7 @@ def main():
     if args.block_size <= 0:
         args.block_size = tokenizer.max_len_single_sentence  # Our input block size will be the max possible for the model
     args.block_size = min(args.block_size, tokenizer.max_len_single_sentence)
+    # load model
     if args.model_name_or_path:
         model = model_class.from_pretrained(args.model_name_or_path,
                                             from_tf=bool('.ckpt' in args.model_name_or_path),
@@ -529,7 +530,7 @@ def main():
         train_dataset = TextDataset(tokenizer, args,args.train_data_file)
         if args.local_rank == 0:
             torch.distributed.barrier()
-
+            
         train(args, train_dataset, model, tokenizer)
         
         writer.flush()

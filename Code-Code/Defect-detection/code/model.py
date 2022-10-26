@@ -6,7 +6,7 @@ import torch
 
     
 class Model(nn.Module):   
-    def __init__(self, encoder,config,tokenizer,args):
+    def __init__(self, encoder,config, tokenizer, args):
         super(Model, self).__init__()
         self.encoder = encoder
         self.config=config

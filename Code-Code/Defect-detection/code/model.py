@@ -17,6 +17,7 @@ class Model(nn.Module):
                 attention_mask=None,
                 labels=None,
                 inputs_embeds=None): 
+        
         outputs=self.encoder(input_ids, 
                              attention_mask=attention_mask,
                              inputs_embeds=inputs_embeds)
@@ -30,7 +31,7 @@ class Model(nn.Module):
             loss=-loss.mean()
             return loss,prob, outputs.attentions
         else:
-            return prob
+            return prob, outputs
       
         
  

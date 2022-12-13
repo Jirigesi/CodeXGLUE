@@ -355,3 +355,11 @@ MigrationBackup/
 # data
 *.json
 *.jsonl
+*.txt
+
+*.pkl
+
+Code-Code/ClozeTesting-all/evaluator/predictions/ruby/predictions.txt
+Code-Code/CodeCompletion-token/save/javaCorpus/dev_blocksize_1024_wordsize_1_rank_0
+Code-Code/CodeCompletion-token/save/javaCorpus/test_blocksize_1024
+Code-Code/CodeCompletion-token/save/javaCorpus/train_blocksize_1024_wordsize_1_rank_0

@@ -43,10 +43,12 @@ def main():
     parser.add_argument('--predictions', '-p', help="directory name  of the leaderboard predictions, in txt format.")
 
     args = parser.parse_args()
-    for lang in ['ruby', 'javascript', 'go', 'python', 'java', 'php']:
+    # for lang in ['ruby', 'javascript', 'go', 'python', 'java', 'php']:
+    for lang in ['java']:
         answers = read_answers(os.path.join(args.answers, lang, 'answers.txt'))
         predictions = read_predictions(os.path.join(args.predictions, lang, 'predictions.txt'))
         acc = calculate_scores(answers, predictions)
+        print('answers: {}, predictions: {}'.format(len(answers), len(predictions)))
         print('ClozeTest-all:{}, acc: {}'.format(lang, acc))
 
 

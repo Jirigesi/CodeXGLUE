@@ -37,8 +37,8 @@ def test_single(text, model, idx2word, tokenizer, device):
 
 
 def cloze_test(args, lang, model, tokenizer, device):
-    cloze_words_file = os.path.join('../data', 'cloze-'+args.cloze_mode, 'cloze_test_words.txt')
-    file_path = os.path.join('../data', 'cloze-'+args.cloze_mode, lang, 'clozeTest.json')
+    cloze_words_file = os.path.join('data', 'cloze-'+args.cloze_mode, 'cloze_test_words.txt')
+    file_path = os.path.join('data', 'cloze-'+args.cloze_mode, lang, 'clozeTest.json')
 
     idx2word = get_cloze_words(cloze_words_file, tokenizer)
     lines = json.load(open(file_path))
